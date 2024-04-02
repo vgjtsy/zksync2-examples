@@ -6,8 +6,8 @@ Examples on how to interact with zkSync Era network using different SDKs.
 
 - [Go](go).
 - JavaScript: 
-  - [backend](js/backend),
-  - [frontend](js/frontend). 
+  - `ethers v5`: backend, frontend.
+  - `ethers v6`: [backend](js/ethers-v6/backend), [frontend](js/ethers-v6/frontend). 
 - [Python](python).
 
 ## 🤝 Contributing
