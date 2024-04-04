@@ -15,7 +15,7 @@ import {WatchContractEvents} from './components/WatchContractEvents'
 import {WatchPendingTransactions} from './components/WatchPendingTransactions'
 import {WriteContract} from './components/WriteContract'
 import {WriteContractPrepared} from './components/WriteContractPrepared'
-import {L1Signer, L1VoidSigner, Provider, types, utils, BrowserProvider} from 'zksync-ethers';
+import {L1Signer, L1VoidSigner, Provider, types, utils, BrowserProvider, Signer, Wallet} from 'zksync-ethers';
 import {ethers} from 'ethers';
 
 const tokenL1 = '0x56E69Fa1BB0d1402c89E3A4E3417882DeA6B14Be';
@@ -29,6 +29,7 @@ export function App() {
     const {account, getSigner, getProvider} = useEthereum();
 
     async function depositETH() {
+        // Browser wallet should be connected to Ethereum Sepolia network
         const browserProvider = new ethers.BrowserProvider((window as any).ethereum);
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
         const signer = L1Signer.from(await browserProvider.getSigner(), provider);
@@ -47,6 +48,7 @@ export function App() {
     }
 
     async function depositToken() {
+        // Browser wallet should be connected to Ethereum Sepolia network
         const browserProvider = new ethers.BrowserProvider((window as any).ethereum);
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
         const ethProvider = ethers.getDefaultProvider(sepolia);
@@ -68,10 +70,14 @@ export function App() {
     }
 
     async function withdrawETH() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
-        const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
         const ethProvider = ethers.getDefaultProvider(sepolia);
+        const signer = Signer.from(
+            await browserProvider.getSigner(),
+            Number((await browserProvider.getNetwork()).chainId)
+        );
         const voidSigner = new L1VoidSigner(signer.address, ethProvider, provider);
 
         console.log(`L2 balance before withdrawal: ${await voidSigner.getBalance()}`);
@@ -88,10 +94,15 @@ export function App() {
     }
 
     async function withdrawToken() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
-        const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
         const ethProvider = ethers.getDefaultProvider(sepolia);
+        const signer = Signer.from(
+            await browserProvider.getSigner(),
+            Number((await browserProvider.getNetwork()).chainId),
+            provider
+        );
         const voidSigner = new L1VoidSigner(signer.address, ethProvider, provider);
 
         console.log(`L2 balance before withdrawal: ${await voidSigner.getBalance(token)}`);
@@ -101,15 +112,19 @@ export function App() {
             token: token,
             to: signer.address,
             amount: 5,
-            // Set bridge address to prevent error: The method "zks_getBridgeContracts" does not exist
-            bridgeAddress: (await provider.getDefaultBridgeAddresses()).erc20L2
         });
+
+        signer.sendTransaction({
+            to: receiver,
+            value: ethers.parseEther('0.01')
+        })
 
         console.log(`L2 balance after withdrawal: ${await voidSigner.getBalance(token)}`);
         console.log(`L1 balance after withdrawal: ${await voidSigner.getBalanceL1(tokenL1)}`);
     }
 
     async function transferETH() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
         const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -127,6 +142,7 @@ export function App() {
     }
 
     async function transferToken() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
         const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -145,6 +161,7 @@ export function App() {
     }
 
     async function transferETHUsingApprovalPaymaster() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
         const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -168,6 +185,7 @@ export function App() {
     }
 
     async function transferTokenUsingApprovalPaymaster() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
         const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -194,6 +212,7 @@ export function App() {
     }
 
     async function gasEstimation() {
+        // Browser wallet should be connected to zkSync Era Sepolia network
         const browserProvider = new BrowserProvider((window as any).ethereum);
         const signer = await browserProvider.getSigner();
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
@@ -232,6 +251,7 @@ export function App() {
     }
 
     const getFullRequiredDepositFee = async () => {
+        // Browser wallet should be connected to Ethereum Sepolia network
         const browserProvider = new ethers.BrowserProvider((window as any).ethereum);
         const provider = Provider.getDefaultProvider(types.Network.Sepolia);
         const signer = L1Signer.from(await browserProvider.getSigner(), provider);
